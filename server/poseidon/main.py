@@ -86,15 +86,20 @@ def labels():
     return {"photos": practice_labels(), "sets": practice_set_labels()}
 
 
+def _form_bool(value: str) -> bool:
+    return value.strip().lower() in {"1", "true", "yes", "on"}
+
+
 @app.post("/analyze/photo")
 async def analyze_photo(
     file: UploadFile = File(...),
     intended_view: str = Form("front"),
     photo_id: str = Form(""),
+    live: str = Form("0"),
 ):
     data = await file.read()
     img = _decode(data)
-    result = analyze_image(img, intended_view)
+    result = analyze_image(img, intended_view, live=_form_bool(live))
     pid = photo_id or f"P-{uuid4().hex[:8]}"
     digest = sha256(data).hexdigest()
     return _photo_payload(result, pid, intended_view, digest)

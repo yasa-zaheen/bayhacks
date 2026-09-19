@@ -1,10 +1,16 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import {
+  cameraPreflight,
+  describeCameraError,
+  openCameraStream,
+} from "../utils/cameraSupport";
 
 type WebcamState = {
   stream: MediaStream | null;
   error: string;
+  hint: string;
   starting: boolean;
 };
 
@@ -13,27 +19,40 @@ export function useWebcam() {
   const [state, setState] = useState<WebcamState>({
     stream: null,
     error: "",
+    hint: "",
     starting: false,
   });
 
   const start = useCallback(async () => {
-    setState((prev) => ({ ...prev, starting: true, error: "" }));
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({
-        video: { facingMode: "environment", width: { ideal: 1280 } },
-        audio: false,
-      });
-      if (videoRef.current) {
-        videoRef.current.srcObject = stream;
-        await videoRef.current.play().catch(() => undefined);
-      }
-      setState({ stream, error: "", starting: false });
-      return true;
-    } catch {
+    const blocked = cameraPreflight();
+    if (blocked) {
       setState({
         stream: null,
         starting: false,
-        error: "Camera blocked — allow webcam access or use Upload instead.",
+        error: blocked.message,
+        hint: blocked.hint,
+      });
+      return false;
+    }
+
+    setState((prev) => ({ ...prev, starting: true, error: "", hint: "" }));
+    try {
+      const stream = await openCameraStream();
+      if (videoRef.current) {
+        videoRef.current.srcObject = stream;
+        videoRef.current.setAttribute("playsinline", "true");
+        videoRef.current.muted = true;
+        await videoRef.current.play().catch(() => undefined);
+      }
+      setState({ stream, error: "", hint: "", starting: false });
+      return true;
+    } catch (error) {
+      const described = describeCameraError(error);
+      setState({
+        stream: null,
+        starting: false,
+        error: described.message,
+        hint: described.hint,
       });
       return false;
     }
@@ -42,7 +61,7 @@ export function useWebcam() {
   const stop = useCallback(() => {
     setState((prev) => {
       prev.stream?.getTracks().forEach((track) => track.stop());
-      return { stream: null, error: "", starting: false };
+      return { stream: null, error: "", hint: "", starting: false };
     });
     if (videoRef.current) videoRef.current.srcObject = null;
   }, []);
@@ -56,7 +75,7 @@ export function useWebcam() {
     const ctx = canvas.getContext("2d");
     if (!ctx) return null;
     ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-    return canvas.toDataURL("image/jpeg", 0.85);
+    return canvas.toDataURL("image/jpeg", 0.92);
   }, []);
 
   useEffect(() => {
@@ -70,6 +89,7 @@ export function useWebcam() {
     videoRef,
     active: Boolean(state.stream),
     error: state.error,
+    hint: state.hint,
     starting: state.starting,
     start,
     stop,

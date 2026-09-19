@@ -18,6 +18,12 @@ export const metadata: Metadata = {
     "Photograph electronic equipment correctly. Poseidon checks blur, lighting, framing, and missing views, then issues a digital product passport.",
 };
 
+export const viewport = {
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover" as const,
+};
+
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html

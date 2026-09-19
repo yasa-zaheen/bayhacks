@@ -10,7 +10,17 @@ export type DemoCueId =
   | "rear_ready"
   | "label"
   | "label_ready"
-  | "finish";
+  | "finish"
+  | "retake_blur"
+  | "retake_glare"
+  | "retake_dark"
+  | "retake_framing"
+  | "retake_label"
+  | "retake_mismatch"
+  | "retake_success"
+  | "accept_perfect_front"
+  | "accept_perfect_rear"
+  | "accept_perfect_label";
 
 export type DemoCue = {
   id: DemoCueId;
@@ -52,7 +62,7 @@ export const DEMO_CUES: Record<DemoCueId, DemoCue> = {
   rear: {
     id: "rear",
     view: "rear_ports",
-    line: "Now move to the back. Show the ports and connectors.",
+    line: "Step two — the back, where all the ports and details are.",
     captureReady: false,
     delayMs: 3000,
   },
@@ -66,21 +76,21 @@ export const DEMO_CUES: Record<DemoCueId, DemoCue> = {
   rear_ready: {
     id: "rear_ready",
     view: "rear_ports",
-    line: "Looks aligned. Capture the rear now.",
+    line: "Much better. Hold steady on the rear — capturing now.",
     captureReady: true,
     delayMs: 0,
   },
   label: {
     id: "label",
     view: "label",
-    line: "Last — the DEMO label. Get the orange tape in frame.",
+    line: "Step three — the serial number or asset tag.",
     captureReady: false,
     delayMs: 2800,
   },
   label_ready: {
     id: "label_ready",
     view: "label",
-    line: "Hold close and tap capture.",
+    line: "Good. Hold still — auto-capture when the tag is sharp.",
     captureReady: true,
     delayMs: 0,
   },
@@ -88,6 +98,76 @@ export const DEMO_CUES: Record<DemoCueId, DemoCue> = {
     id: "finish",
     view: "label",
     line: "All photos captured. Here's your digital passport.",
+    captureReady: false,
+    delayMs: 0,
+  },
+  retake_blur: {
+    id: "retake_blur",
+    view: "front",
+    line: "That photo is blurry. Hold the camera steady and try again.",
+    captureReady: false,
+    delayMs: 0,
+  },
+  retake_glare: {
+    id: "retake_glare",
+    view: "label",
+    line: "There's too much glare on the serial tag. Tilt the device or move the light.",
+    captureReady: false,
+    delayMs: 0,
+  },
+  retake_dark: {
+    id: "retake_dark",
+    view: "rear_ports",
+    line: "The contrast is too dark. Move it somewhere brighter, then try again.",
+    captureReady: false,
+    delayMs: 0,
+  },
+  retake_framing: {
+    id: "retake_framing",
+    view: "label",
+    line: "You're too close. Step back so the full tag is in frame.",
+    captureReady: false,
+    delayMs: 0,
+  },
+  retake_label: {
+    id: "retake_label",
+    view: "label",
+    line: "Include more of the serial or model plate in frame, then retry.",
+    captureReady: false,
+    delayMs: 0,
+  },
+  retake_mismatch: {
+    id: "retake_mismatch",
+    view: "front",
+    line: "That looks like the wrong view. Match the coaching step and retry.",
+    captureReady: false,
+    delayMs: 0,
+  },
+  retake_success: {
+    id: "retake_success",
+    view: "front",
+    line: "Much better. That shot passes quality checks.",
+    captureReady: false,
+    delayMs: 0,
+  },
+  accept_perfect_front: {
+    id: "accept_perfect_front",
+    view: "front",
+    line: "Perfect. That front shot passes quality checks.",
+    captureReady: false,
+    delayMs: 0,
+  },
+  accept_perfect_rear: {
+    id: "accept_perfect_rear",
+    view: "rear_ports",
+    line: "Okay — now that's perfect. That's a perfect picture.",
+    captureReady: false,
+    delayMs: 0,
+  },
+  accept_perfect_label: {
+    id: "accept_perfect_label",
+    view: "label",
+    line: "Okay — now that's perfect. That's a perfect picture.",
     captureReady: false,
     delayMs: 0,
   },
@@ -104,7 +184,7 @@ const NEXT_AFTER_CUE: Partial<Record<DemoCueId, DemoCueId>> = {
 
 const NEXT_AFTER_CAPTURE: Partial<Record<ViewName, DemoCueId>> = {
   front: "rear",
-  rear_ports: "label",
+  rear_ports: "label_ready",
 };
 
 export function nextAutoCue(id: DemoCueId): DemoCueId | null {
@@ -113,6 +193,48 @@ export function nextAutoCue(id: DemoCueId): DemoCueId | null {
 
 export function nextCueAfterCapture(view: ViewName): DemoCueId | "finish" {
   return NEXT_AFTER_CAPTURE[view] ?? "finish";
+}
+
+const STEADY_CUE: Partial<Record<ViewName, DemoCueId>> = {
+  front: "front_steady",
+  rear_ports: "rear_steady",
+  label: "label_ready",
+};
+
+export function steadyCueForView(view: ViewName): DemoCueId {
+  return STEADY_CUE[view] ?? "front_steady";
+}
+
+export function readyCueForView(view: ViewName): DemoCueId {
+  if (view === "front") return "front_ready";
+  if (view === "rear_ports") return "rear_ready";
+  return "label_ready";
+}
+
+export function perfectCueForView(view: ViewName): DemoCueId {
+  if (view === "front") return "accept_perfect_front";
+  if (view === "rear_ports") return "accept_perfect_rear";
+  return "accept_perfect_label";
+}
+
+export function retakeCueFromResult(
+  issueCodes: string[],
+  viewMismatch: boolean,
+  view: ViewName
+): DemoCueId {
+  if (viewMismatch) return "retake_mismatch";
+  if (issueCodes.includes("blur")) return "retake_blur";
+  if (issueCodes.includes("glare_or_overexposed")) return "retake_glare";
+  if (issueCodes.includes("underexposed")) return "retake_dark";
+  if (issueCodes.includes("label_obstructed")) return "retake_label";
+  if (issueCodes.includes("framing")) {
+    return view === "label" ? "retake_label" : "retake_framing";
+  }
+  return "retake_blur";
+}
+
+export function patchCueView(id: DemoCueId, view: ViewName): DemoCue {
+  return { ...DEMO_CUES[id], view };
 }
 
 const MOCK_PLAYBOOK = [

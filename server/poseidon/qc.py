@@ -96,6 +96,39 @@ def device_mask(gray: np.ndarray) -> np.ndarray:
     return (lab == i).astype(np.uint8) * 255
 
 
+def demo_tape_mask(bgr: np.ndarray) -> np.ndarray:
+    """Orange-red DEMO challenge tape — narrower than generic red_mask."""
+    hsv = cv2.cvtColor(bgr, cv2.COLOR_BGR2HSV)
+    orange = cv2.inRange(hsv, (8, 120, 110), (22, 255, 255))
+    orange = cv2.morphologyEx(
+        orange, cv2.MORPH_CLOSE, cv2.getStructuringElement(cv2.MORPH_RECT, (7, 7))
+    )
+    return orange
+
+
+def _demo_tape_present(
+    red_stats: Optional[dict],
+    tape_ratio: float,
+    h: int,
+    w: int,
+) -> bool:
+    """True only for a confident orange DEMO tape — not skin, clothing, or decor."""
+    if not red_stats or tape_ratio < 0.012:
+        return False
+    main = red_stats["main"]
+    area_ratio = main["area"] / max(h * w, 1)
+    if area_ratio < 0.008 or area_ratio > 0.2:
+        return False
+    if red_stats["rectangularity"] < 0.72:
+        return False
+    if red_stats["solidity"] < 0.88:
+        return False
+    aspect = main["w"] / max(main["h"], 1)
+    if aspect < 0.35 or aspect > 5.5:
+        return False
+    return True
+
+
 def _largest_red_stats(rm: np.ndarray) -> Optional[dict]:
     n, lab, stats, _ = cv2.connectedComponentsWithStats((rm > 0).astype(np.uint8), 8)
     comps = []
@@ -156,6 +189,109 @@ def _border_contact(mask: np.ndarray, band: int = 4) -> dict:
         "right": right,
         "max": max(top, bottom, left, right),
     }
+
+
+def _subject_bbox(mask: np.ndarray) -> Optional[tuple[int, int, int, int]]:
+    """Return x0, y0, x1, y1 for the largest foreground region."""
+    ys, xs = np.where(mask > 0)
+    if len(xs) < 40:
+        return None
+    return int(xs.min()), int(ys.min()), int(xs.max()), int(ys.max())
+
+
+def _looks_clipped(
+    x0: int,
+    y0: int,
+    x1: int,
+    y1: int,
+    w: int,
+    h: int,
+    *,
+    min_fill: float = 0.14,
+) -> bool:
+    """Detect partial cut-off, not a subject that simply fills the frame."""
+    edge = max(3, int(min(h, w) * 0.01))
+    fill = ((x1 - x0 + 1) * (y1 - y0 + 1)) / max(h * w, 1)
+    touches = [
+        x0 <= edge,
+        x1 >= w - edge - 1,
+        y0 <= edge,
+        y1 >= h - edge - 1,
+    ]
+    touch_count = sum(touches)
+    if fill < min_fill:
+        return True
+    if touch_count >= 3:
+        return True
+    if touch_count >= 1 and fill < 0.22:
+        return True
+    return False
+
+
+def _sharpness_region(
+    work: np.ndarray, dm: np.ndarray, h: int, w: int
+) -> tuple[np.ndarray, str]:
+    """Prefer the detected subject/device blob over a fixed center crop."""
+    y0, y1 = int(h * 0.15), int(h * 0.85)
+    x0, x1 = int(w * 0.15), int(w * 0.85)
+    center = work[y0:y1, x0:x1]
+
+    bbox = _subject_bbox(dm)
+    if not bbox:
+        return center, "center"
+    bx0, by0, bx1, by1 = bbox
+    fill = ((bx1 - bx0 + 1) * (by1 - by0 + 1)) / max(h * w, 1)
+    if fill < 0.035:
+        return center, "center"
+    pad = max(2, int(min(h, w) * 0.02))
+    sy0 = max(0, by0 - pad)
+    sy1 = min(h, by1 + pad + 1)
+    sx0 = max(0, bx0 - pad)
+    sx1 = min(w, bx1 + pad + 1)
+    subject = work[sy0:sy1, sx0:sx1]
+    if subject.size < 400:
+        return center, "center"
+    return subject, "subject"
+
+
+def _laplacian_var(gray: np.ndarray) -> float:
+    if gray.size == 0:
+        return 0.0
+    return float(cv2.Laplacian(gray, cv2.CV_64F).var())
+
+
+def _framing_issue(
+    intended_view: str,
+    dm: np.ndarray,
+    h: int,
+    w: int,
+    demo_tape_present: bool,
+    red_stats: Optional[dict],
+    *,
+    live: bool = False,
+) -> bool:
+    if intended_view == "label":
+        if demo_tape_present and red_stats:
+            m = red_stats["main"]
+            return _looks_clipped(
+                m["x"], m["y"], m["x"] + m["w"], m["y"] + m["h"], w, h, min_fill=0.05
+            )
+        bbox = _subject_bbox(dm)
+        if not bbox:
+            return not live
+        x0, y0, x1, y1 = bbox
+        min_fill = 0.05 if live else 0.08
+        return _looks_clipped(x0, y0, x1, y1, w, h, min_fill=min_fill)
+
+    bbox = _subject_bbox(dm)
+    if not bbox:
+        return not live
+    x0, y0, x1, y1 = bbox
+    fill = ((x1 - x0 + 1) * (y1 - y0 + 1)) / max(h * w, 1)
+    if live and fill >= 0.045:
+        return False
+    min_fill = 0.06 if live else 0.12
+    return _looks_clipped(x0, y0, x1, y1, w, h, min_fill=min_fill)
 
 
 def _port_score(bgr: np.ndarray, gray: np.ndarray) -> float:
@@ -228,7 +364,7 @@ def extract_demo_id(bgr: np.ndarray, rm: np.ndarray) -> Optional[str]:
     return None
 
 
-def analyze_image(image: np.ndarray, intended_view: str) -> PhotoResult:
+def analyze_image(image: np.ndarray, intended_view: str, *, live: bool = False) -> PhotoResult:
     bgr = _bgr(image)
     h0, w0 = bgr.shape[:2]
     # Downscale only huge images so Laplacian stays comparable to the practice set.
@@ -244,7 +380,11 @@ def analyze_image(image: np.ndarray, intended_view: str) -> PhotoResult:
     y0, y1 = int(h * 0.15), int(h * 0.85)
     x0, x1 = int(w * 0.15), int(w * 0.85)
     center = work[y0:y1, x0:x1]
-    lap_c = float(cv2.Laplacian(center, cv2.CV_64F).var())
+    dm = device_mask(work)
+    sharp_roi, sharp_source = _sharpness_region(work, dm, h, w)
+    lap_subject = _laplacian_var(sharp_roi)
+    lap_center = _laplacian_var(center)
+    lap_c = max(lap_subject, lap_center * 0.9) if live else lap_center
     mean_c = float(center.mean())
     p5 = float(np.percentile(work, 5))
     p95 = float(np.percentile(work, 95))
@@ -255,7 +395,10 @@ def analyze_image(image: np.ndarray, intended_view: str) -> PhotoResult:
     red_stats = _largest_red_stats(rm)
     red_border = _border_contact(rm, band=12)
 
-    dm = device_mask(work)
+    tape_mask = demo_tape_mask(bgr)
+    tape_ratio = float((tape_mask > 0).mean())
+    tape_stats = _largest_red_stats(tape_mask)
+
     dev_border = _border_contact(dm, band=4)
     port = _port_score(bgr, work)
 
@@ -265,63 +408,78 @@ def analyze_image(image: np.ndarray, intended_view: str) -> PhotoResult:
     observed = intended_view
     fraud: list[str] = []
 
-    # 1. Exposure
-    underexposed = mean_c < 48 or p95 < 85
+    # 1. Exposure — live webcams read darker than practice-set photos
+    if live:
+        underexposed = mean_c < 26 or p95 < 52
+    else:
+        underexposed = mean_c < 36 or p95 < 70
     if underexposed:
         issues.append("underexposed")
 
-    # 2. Glare / overexposure
-    if hi > 0.70 or (hi > 0.40 and lap_c < 25):
+    # 2. Glare / overexposure — tolerate mild specular highlights
+    if hi > 0.85 or (hi > 0.58 and lap_c < 16):
         issues.append("glare_or_overexposed")
-    elif hi > 0.45 and mean_c > 170:
+    elif hi > 0.52 and mean_c > 190:
         review = True
 
-    # 3. Framing
-    if "underexposed" not in issues:
-        if intended_view == "label":
-            if red_border["max"] > 0.05:
-                issues.append("framing")
-        else:
-            side_cut = max(dev_border["left"], dev_border["right"])
-            if intended_view == "rear_ports" and side_cut > 0.15:
-                review = True
-            elif side_cut > 0.28:
-                issues.append("framing")
+    demo_tape_present = _demo_tape_present(tape_stats, tape_ratio, h, w)
 
-    # 4. Blur — skip when darkness, glare, or a cut-off frame already explain the shot
+    # 3. Framing — clip detection (full-width device in frame is OK)
+    if "underexposed" not in issues:
+        if intended_view == "rear_ports":
+            bbox = _subject_bbox(dm)
+            if bbox and _looks_clipped(*bbox, w, h, min_fill=0.1):
+                review = True
+            elif not bbox:
+                review = True
+        elif _framing_issue(
+            intended_view, dm, h, w, demo_tape_present, red_stats, live=live
+        ):
+            issues.append("framing")
+
+    # 4. Blur — live webcam JPEGs are softer than practice-set stills
     if (
         "underexposed" not in issues
         and "glare_or_overexposed" not in issues
         and "framing" not in issues
         and not review
     ):
-        blur_cut = 100 if intended_view == "label" else 90
+        if live:
+            blur_cut = 22 if intended_view == "label" else 14 if intended_view == "front" else 16
+        else:
+            blur_cut = 32 if intended_view == "label" else 24
         if lap_c < blur_cut:
             issues.append("blur")
 
-    # 5. Label obstruction (only when we can see the tape)
+    # 5. Label obstruction — only when orange DEMO tape is clearly present
     if (
         intended_view == "label"
+        and demo_tape_present
         and "underexposed" not in issues
         and "blur" not in issues
         and "glare_or_overexposed" not in issues
         and "framing" not in issues
-        and red_stats
+        and tape_stats
     ):
         obstructed = (
-            red_stats["solidity"] < 0.92 and red_stats["rectangularity"] < 0.80
-        ) or red_stats["second_ratio"] > 0.28
+            tape_stats["solidity"] < 0.82 and tape_stats["rectangularity"] < 0.68
+        ) or tape_stats["second_ratio"] > 0.42
         if obstructed:
             issues.append("label_obstructed")
             fraud.append("label_tamper")
 
-    # View mismatch
-    if intended_view == "label" and red_ratio < 0.004 and "underexposed" not in issues:
+    # View mismatch — missing DEMO tape is OK for live demo devices
+    if (
+        intended_view == "label"
+        and demo_tape_present
+        and red_ratio < 0.004
+        and "underexposed" not in issues
+    ):
         view_mismatch = True
         review = True
         observed = "uncertain"
         fraud.append("view_mismatch")
-    if intended_view == "rear_ports" and port < 0.18 and "underexposed" not in issues:
+    if intended_view == "rear_ports" and port < 0.12 and "underexposed" not in issues:
         if not review:
             review = True
         observed = "uncertain"
@@ -359,6 +517,10 @@ def analyze_image(image: np.ndarray, intended_view: str) -> PhotoResult:
 
     metrics = {
         "laplacian": round(lap_c, 1),
+        "laplacian_center": round(lap_center, 1),
+        "laplacian_subject": round(lap_subject, 1),
+        "sharpness_source": sharp_source,
+        "live_capture": live,
         "mean_luma": round(mean_c, 1),
         "highlight_ratio": round(hi, 3),
         "p5": round(p5, 1),
@@ -369,6 +531,7 @@ def analyze_image(image: np.ndarray, intended_view: str) -> PhotoResult:
         "port_score": round(port, 3),
         "label_rectangularity": round(red_stats["rectangularity"], 3) if red_stats else None,
         "label_solidity": round(red_stats["solidity"], 3) if red_stats else None,
+        "demo_tape_present": demo_tape_present,
         "width": w0,
         "height": h0,
     }
@@ -536,8 +699,8 @@ def live_scores(image: np.ndarray, intended_view: str) -> dict:
         bgr = cv2.resize(bgr, (int(w0 * scale), int(h0 * scale)), interpolation=cv2.INTER_AREA)
     gray = cv2.cvtColor(bgr, cv2.COLOR_BGR2GRAY)
 
-    r = analyze_image(image, intended_view)
-    ready = r.status == "usable"
+    r = analyze_image(image, intended_view, live=True)
+    ready = r.status in ("usable", "needs_review")
 
     contour_pts, device_bbox = _device_contour(gray)
     glare_spots = _glare_regions(gray)

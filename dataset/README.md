@@ -18,9 +18,9 @@ Beyond the rubric: component callouts, Back Market-style condition grade, circul
 ## Run the API (required)
 
 ```bash
-cd backend
+cd server/poseidon
 python3 -m pip install -r requirements.txt
-python3 -m uvicorn main:app --host 0.0.0.0 --port 8000
+python3 -m uvicorn main:app --host 127.0.0.1 --port 8000
 ```
 
 Open http://127.0.0.1:8000 for the judge web UI (live webcam **or** upload **or** practice sets).

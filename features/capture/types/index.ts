@@ -8,8 +8,8 @@ export const VIEW_COPY: Record<ViewName, { title: string; hint: string }> = {
     hint: "Show the connection side and connectors.",
   },
   label: {
-    title: "DEMO label",
-    hint: "Complete orange DEMO tape must be readable and unobstructed.",
+    title: "Serial / asset tag",
+    hint: "Close-up of the sticker, model plate, or serial number — no orange DEMO tape needed.",
   },
 };
 
@@ -45,6 +45,8 @@ export type Passport = {
   issued_at: string;
   device_class: string;
   device_title: string;
+  model?: string;
+  asset_serial?: string;
   condition_grade: {
     letter: string;
     label: string;
@@ -105,4 +107,13 @@ export type GuideBox = {
   y: number;
   w: number;
   h: number;
+};
+
+export type CoachMode = "demo" | "operator";
+
+export type LiveArOverlay = {
+  contour: number[][];
+  glareSpots: number[][];
+  deviceBbox: number[] | null;
+  alignmentScore: number;
 };

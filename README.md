@@ -9,27 +9,58 @@ Evaluates a group of device photos for the three required views (`front`, `rear_
 - blur, underexposure, glare/overexposure, framing, DEMO-label obstruction
 - `usable` / `retake` / `needs_review`
 - Missing views are reported separately from retakes
-- Live webcam demo with a scripted voice coach and MediaPipe alignment guides
+- Live webcam demo with voice coach, real OpenCV QC, and MediaPipe alignment guides
 - Upload or run American Circular practice sets SET-001 … SET-009
 
-The live camera path is a controlled demo: the same voice lines play every time and the passport is canned. Upload and practice-set evaluation use the OpenCV backend.
+## Run everything (one command)
 
-## Run the API (required for upload / practice sets)
-
-```bash
-cd backend
-python3 -m pip install -r requirements.txt
-python3 -m uvicorn main:app --host 0.0.0.0 --port 8000
-```
-
-## Run the web app
+OpenCV analysis lives in `server/poseidon/` and is started automatically with the web app.
 
 ```bash
 bun install
-bun dev
+bun run analysis:install   # first time only — Python deps
+bun dev                    # Next.js + analysis on port 8000 (internal)
 ```
 
-Open [http://localhost:3000](http://localhost:3000). The app talks to `NEXT_PUBLIC_API_URL` (defaults to `http://localhost:8000`).
+Open [http://localhost:3000](http://localhost:3000). The browser calls `/poseidon-api/*`, which Next.js proxies to the analysis server on your laptop (`127.0.0.1:8000`). **Do not set `NEXT_PUBLIC_API_URL` for local or phone demos** — that bypasses the proxy and breaks on iPhone.
+
+### Phone demo (Live Camera + real OpenCV QC)
+
+Safari on iPhone **blocks many ports** (including `:8000`). Never open the analysis URL in the browser — only open the Next.js app URL. API traffic goes through `/poseidon-api/*` on the same host.
+
+#### Recommended: ngrok (no restricted-port errors, HTTPS for camera)
+
+```bash
+bun run dev:tunnel
+```
+
+In another terminal ([install ngrok](https://ngrok.com/download) if needed):
+
+```bash
+ngrok http 3000
+```
+
+On your iPhone, open the **`https://….ngrok-free.app`** URL from ngrok (standard port 443 — Safari allows this).
+
+#### Alternative: same Wi‑Fi + HTTPS on port 8080
+
+Port **8080** is Safari-safe (avoid `:8000`, `:6000`, etc.).
+
+```bash
+bun run dev:https
+```
+
+On iPhone (same Wi‑Fi): `https://YOUR_MAC_IP:8080` (example `https://10.2.1.4:8080`). Tap through the certificate warning once.
+
+**Also check:** Settings → Privacy & Security → **Local Network** → enable for Safari.
+
+#### If you still see “restricted network port”
+
+You are probably loading a **blocked port** directly. Use ngrok, or confirm the URL ends in **`:8080`** or **`.ngrok-free.app`** — not **`:8000`**.
+
+#### If you see “Analysis offline” on phone
+
+Your laptop is not running `bun dev`, or `.env.local` has `NEXT_PUBLIC_API_URL=http://localhost:8000` (remove it — `localhost` on the phone is the phone, not your Mac).
 
 ## Demo voice MP3s
 
@@ -37,13 +68,12 @@ Generate clips in ElevenLabs and drop them in `public/audio/poseidon-demo/` usin
 
 ## Models / services
 
-- OpenCV (local, via FastAPI)
+- OpenCV (local, `server/poseidon/` — proxied via Next.js)
 - MediaPipe Object Detector (`@mediapipe/tasks-vision`) for live AR guides
 - Pre-rendered MP3 clips in `public/audio/poseidon-demo/` (see README there; no ElevenLabs API at runtime)
 - No paid GPU. No custom trained weights. No ACS production data.
 
 ## Known limitations
 
-- Live demo QC is scripted, not live OpenCV
 - Exterior ports and DEMO tape, not internal PCB chips
 - Device identity is a class guess (tower / SFF / monitor / appliance / optical player)

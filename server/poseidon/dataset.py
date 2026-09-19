@@ -4,7 +4,7 @@ import csv
 from functools import lru_cache
 from pathlib import Path
 
-ROOT = Path(__file__).resolve().parents[1] / "dataset"
+ROOT = Path(__file__).resolve().parents[2] / "dataset"
 IMAGES = ROOT / "images"
 
 
