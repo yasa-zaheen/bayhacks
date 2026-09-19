@@ -22,7 +22,7 @@ export function CapturePage() {
           American Circular · Bay Hacks
         </p>
         <h1 className="mt-3 text-[48px] font-medium uppercase leading-[0.9] tracking-tight sm:text-[72px]">
-          Poseidon
+          ApertureGrade
         </h1>
         <p className="mt-4 max-w-xl text-base text-mute">
           Photograph electronic equipment correctly. Live coaching with auto-capture

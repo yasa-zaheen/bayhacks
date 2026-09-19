@@ -1,4 +1,4 @@
-# Poseidon — Circular Capture Coach
+# ApertureGrade — Circular Capture Coach
 
 American Circular track entry for Bay Hacks. Next.js web app that coaches device photography, evaluates capture quality, and issues a Digital Product Passport.
 
@@ -14,7 +14,7 @@ Evaluates a group of device photos for the three required views (`front`, `rear_
 
 ## Run everything (one command)
 
-OpenCV analysis lives in `server/poseidon/` and is started automatically with the web app.
+OpenCV analysis lives in `server/aperturegrade/` and is started automatically with the web app.
 
 ```bash
 bun install
@@ -22,11 +22,11 @@ bun run analysis:install   # first time only — Python deps
 bun dev                    # Next.js + analysis on port 8000 (internal)
 ```
 
-Open [http://localhost:3000](http://localhost:3000). The browser calls `/poseidon-api/*`, which Next.js proxies to the analysis server on your laptop (`127.0.0.1:8000`). **Do not set `NEXT_PUBLIC_API_URL` for local or phone demos** — that bypasses the proxy and breaks on iPhone.
+Open [http://localhost:3000](http://localhost:3000). The browser calls `/aperturegrade-api/*`, which Next.js proxies to the analysis server on your laptop (`127.0.0.1:8000`). **Do not set `NEXT_PUBLIC_API_URL` for local or phone demos** — that bypasses the proxy and breaks on iPhone.
 
 ### Phone demo (Live Camera + real OpenCV QC)
 
-Safari on iPhone **blocks many ports** (including `:8000`). Never open the analysis URL in the browser — only open the Next.js app URL. API traffic goes through `/poseidon-api/*` on the same host.
+Safari on iPhone **blocks many ports** (including `:8000`). Never open the analysis URL in the browser — only open the Next.js app URL. API traffic goes through `/aperturegrade-api/*` on the same host.
 
 #### Recommended: ngrok (no restricted-port errors, HTTPS for camera)
 
@@ -64,13 +64,13 @@ Your laptop is not running `bun dev`, or `.env.local` has `NEXT_PUBLIC_API_URL=h
 
 ## Demo voice MP3s
 
-Generate clips in ElevenLabs and drop them in `public/audio/poseidon-demo/` using the exact filenames in [`public/audio/poseidon-demo/README.txt`](public/audio/poseidon-demo/README.txt). The Live Camera tab plays them in order — same script every demo.
+Generate clips in ElevenLabs and drop them in `public/audio/aperturegrade-demo/` using the exact filenames in [`public/audio/aperturegrade-demo/README.txt`](public/audio/aperturegrade-demo/README.txt). The Live Camera tab plays them in order — same script every demo.
 
 ## Models / services
 
-- OpenCV (local, `server/poseidon/` — proxied via Next.js)
+- OpenCV (local, `server/aperturegrade/` — proxied via Next.js)
 - MediaPipe Object Detector (`@mediapipe/tasks-vision`) for live AR guides
-- Pre-rendered MP3 clips in `public/audio/poseidon-demo/` (see README there; no ElevenLabs API at runtime)
+- Pre-rendered MP3 clips in `public/audio/aperturegrade-demo/` (see README there; no ElevenLabs API at runtime)
 - No paid GPU. No custom trained weights. No ACS production data.
 
 ## Known limitations

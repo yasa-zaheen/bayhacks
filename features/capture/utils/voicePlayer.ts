@@ -1,6 +1,6 @@
 /**
- * Local MP3 playback for the Poseidon live demo (same pattern as Cognifit / HackABullVII).
- * Pre-render in ElevenLabs, export MP3, place under public/audio/poseidon-demo/.
+ * Local MP3 playback for the ApertureGrade live demo (same pattern as Cognifit / HackABullVII).
+ * Pre-render in ElevenLabs, export MP3, place under public/audio/aperturegrade-demo/.
  */
 
 let activeAudio: HTMLAudioElement | null = null;
@@ -63,7 +63,7 @@ export function playMp3(src: string): Promise<void> {
       if (process.env.NODE_ENV === "development") {
         const mediaError = audio.error;
         console.warn(
-          `[Poseidon] Audio failed: ${src}`,
+          `[ApertureGrade] Audio failed: ${src}`,
           mediaError?.code ?? event?.type ?? "unknown"
         );
       }

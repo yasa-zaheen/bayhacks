@@ -177,7 +177,7 @@ export function UploadPanel() {
               Upload device photos
             </h2>
             <p className="mt-2 text-base text-mute">
-              Assign each file an intended view. Poseidon runs the full neural QC
+              Assign each file an intended view. ApertureGrade runs the full neural QC
               pipeline and returns issue-specific retake guidance.
             </p>
           </div>

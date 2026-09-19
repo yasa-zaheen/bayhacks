@@ -12,7 +12,7 @@ const nextConfig: NextConfig = {
   async rewrites() {
     return [
       {
-        source: "/poseidon-api/:path*",
+        source: "/aperturegrade-api/:path*",
         destination: "http://127.0.0.1:8000/:path*",
       },
     ];

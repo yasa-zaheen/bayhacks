@@ -6,8 +6,8 @@
     "dev": "concurrently -k -n web,analysis -c cyan,magenta \"next dev\" \"bun run analysis\"",
     "dev:https": "concurrently -k -n web,analysis -c cyan,magenta \"next dev --experimental-https --hostname 0.0.0.0 -p 8080\" \"bun run analysis\"",
     "dev:tunnel": "concurrently -k -n web,analysis -c cyan,magenta \"next dev -p 3000\" \"bun run analysis\"",
-    "analysis": "sh -c 'lsof -ti :8000 | xargs kill -9 2>/dev/null || true; cd server/poseidon && python3 -m uvicorn main:app --host 127.0.0.1 --port 8000'",
-    "analysis:install": "python3 -m pip install -r server/poseidon/requirements.txt",
+    "analysis": "sh -c 'lsof -ti :8000 | xargs kill -9 2>/dev/null || true; cd server/aperturegrade && python3 -m uvicorn main:app --host 127.0.0.1 --port 8000'",
+    "analysis:install": "python3 -m pip install -r server/aperturegrade/requirements.txt",
     "build": "next build",
     "start": "next start",
     "lint": "eslint"

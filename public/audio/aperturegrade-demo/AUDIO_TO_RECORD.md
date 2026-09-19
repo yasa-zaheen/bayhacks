@@ -1,8 +1,8 @@
-# Poseidon — ElevenLabs audio kit (scripted demo)
+# ApertureGrade — ElevenLabs audio kit (scripted demo)
 
 Export **MP3**, one voice, same settings for every clip.
 
-**Save folder:** `public/audio/poseidon-demo/`
+**Save folder:** `public/audio/aperturegrade-demo/`
 
 **App mode:** Live Camera → **Demo voice** → Start session
 
@@ -14,7 +14,7 @@ Record each line exactly (or very close). Filename must match.
 
 | # | Save as | When it plays | Paste into ElevenLabs |
 |---|---------|---------------|------------------------|
-| 1 | `welcome.mp3` | Start | Welcome to Poseidon. We'll capture three photos — the front, the back, and the serial tag. |
+| 1 | `welcome.mp3` | Start | Welcome to ApertureGrade. We'll capture three photos — the front, the back, and the serial tag. |
 | 2 | `step 1.mp3` | Front step | Step one — the front. Fill the frame with the device. |
 | 3 | `hold steady.mp3` | After blur / between retakes | Hold steady… stop shaking for a moment. |
 | 4 | `nice picture.mp3` | Front ready to capture | Good. Hold still — I'll capture when you're locked in. |
@@ -80,6 +80,6 @@ Optional legacy (not used): `demo label.mp3`, `retake_success.mp3`
 
 1. Hard refresh the app
 2. Demo voice → Start session
-3. Missing file → console `[Poseidon] Audio failed` (demo continues silently for that cue)
+3. Missing file → console `[ApertureGrade] Audio failed` (demo continues silently for that cue)
 
-Scripts are also in `features/capture/utils/demoAudio.ts` → `POSEIDON_DEMO_SCRIPTS`.
+Scripts are also in `features/capture/utils/demoAudio.ts` → `APERTUREGRADE_DEMO_SCRIPTS`.

@@ -34,7 +34,7 @@ export const DEMO_CUES: Record<DemoCueId, DemoCue> = {
   welcome: {
     id: "welcome",
     view: "front",
-    line: "Welcome to Poseidon. Let's start by taking some pictures.",
+    line: "Welcome to ApertureGrade. Let's start by taking some pictures.",
     captureReady: false,
     delayMs: 4500,
   },
@@ -280,7 +280,7 @@ export function buildMockResult(shots: Shot[]): SetResult {
   }));
 
   const passport: Passport = {
-    passport_id: "DPP-POSEIDON01",
+    passport_id: "DPP-APERTUREGRADE01",
     issued_at: "2026-09-19T15:00:00.000Z",
     device_class: "desktop_tower",
     device_title: "Desktop tower",

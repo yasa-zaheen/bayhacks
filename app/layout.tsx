@@ -13,9 +13,9 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Poseidon — Circular Capture Coach",
+  title: "ApertureGrade — Circular Capture Coach",
   description:
-    "Photograph electronic equipment correctly. Poseidon checks blur, lighting, framing, and missing views, then issues a digital product passport.",
+    "Photograph electronic equipment correctly. ApertureGrade checks blur, lighting, framing, and missing views, then issues a digital product passport.",
 };
 
 export const viewport = {

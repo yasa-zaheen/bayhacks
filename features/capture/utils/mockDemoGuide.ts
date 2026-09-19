@@ -23,7 +23,7 @@ export const MOCK_QC_STORY: MockStoryBeat[] = [
     view: "front",
     expectedStatus: "retake",
     expectedIssues: ["blur"],
-    say: "First capture is motion-blurred. Poseidon rejects it and tells the operator to hold steady — not a generic error.",
+    say: "First capture is motion-blurred. ApertureGrade rejects it and tells the operator to hold steady — not a generic error.",
     screen:
       "Status: retake · issue blur · guidance: Hold the camera steady and refocus on the subject.",
     rubric: "Correct feedback (30) + specific retake guidance (25)",
@@ -84,7 +84,7 @@ export const LIVE_DEMO_SCRIPT: LiveDemoStep[] = [
     title: "Start session",
     mode: "both",
     action: "Tap Start. Allow camera.",
-    say: "Poseidon opens the front step. MediaPipe tracks the device in your hand, not your face.",
+    say: "ApertureGrade opens the front step. MediaPipe tracks the device in your hand, not your face.",
     screen: "AR guide box on prop · coaching banner · stability ring",
   },
   {

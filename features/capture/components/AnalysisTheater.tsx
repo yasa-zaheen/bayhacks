@@ -85,7 +85,7 @@ export function AnalysisTheater({ active, onComplete }: Props) {
         <div className="flex items-center justify-between gap-3">
           <div>
             <p className="text-[10px] font-semibold tracking-[0.28em] uppercase text-[#7ef0df]">
-              Poseidon neural QC
+              ApertureGrade neural QC
             </p>
             <h3 className="mt-1 text-2xl font-medium">Analyzing capture set</h3>
           </div>

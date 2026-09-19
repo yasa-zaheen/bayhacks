@@ -14,7 +14,7 @@ import {
   type DemoCueId,
 } from "../utils/demoScript";
 import { applyLiveDemoPassport } from "../utils/demoDeviceProfile";
-import { POSEIDON_DEMO_AUDIO } from "../utils/demoAudio";
+import { APERTUREGRADE_DEMO_AUDIO } from "../utils/demoAudio";
 import {
   buildScriptedSetResult,
   fakeAnalyzingMs,
@@ -50,7 +50,7 @@ export function useCaptureSession() {
     const base = view ? patchCueView(id, view) : DEMO_CUES[id];
     setCue(lineOverride ? { ...base, line: lineOverride } : base);
     if (mode === "demo") {
-      void playMp3(POSEIDON_DEMO_AUDIO[id]).then(() => {
+      void playMp3(APERTUREGRADE_DEMO_AUDIO[id]).then(() => {
         const auto = nextAutoCue(id);
         if (
           auto &&
@@ -77,7 +77,7 @@ export function useCaptureSession() {
         setCue({
           id: readyCueForView(view),
           view,
-          line: "Hold still — auto-capture when Poseidon locks the frame.",
+          line: "Hold still — auto-capture when ApertureGrade locks the frame.",
           captureReady: true,
           delayMs: 0,
         });
@@ -142,7 +142,7 @@ export function useCaptureSession() {
       setCue(DEMO_CUES.finish);
       setRunning(false);
       if (mode === "demo") {
-        await playMp3(POSEIDON_DEMO_AUDIO.finish);
+        await playMp3(APERTUREGRADE_DEMO_AUDIO.finish);
       }
 
       const uris: Record<string, string> = {};
@@ -233,7 +233,7 @@ export function useCaptureSession() {
             line: DEMO_CUES[perfectId].line,
             captureReady: false,
           });
-          await playMp3(POSEIDON_DEMO_AUDIO[perfectId]);
+          await playMp3(APERTUREGRADE_DEMO_AUDIO[perfectId]);
         }
 
         const acceptedViews = new Set([

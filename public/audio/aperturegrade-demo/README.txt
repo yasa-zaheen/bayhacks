@@ -1,4 +1,4 @@
-Poseidon live demo voice clips
+ApertureGrade live demo voice clips
 ================================
 
 Pre-generate these in ElevenLabs (same voice + settings for every clip), export as MP3,
@@ -37,7 +37,7 @@ Filenames and scripts (paste each block into ElevenLabs)
 ------------------------------------------------------
 
 Filename: 01-welcome.mp3
-Welcome to Poseidon. Let's start by taking some pictures.
+Welcome to ApertureGrade. Let's start by taking some pictures.
 
 Filename: 02-front-instructions.mp3
 Step one — front. Include the outer edges of the device.

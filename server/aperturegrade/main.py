@@ -17,7 +17,7 @@ from qc import analyze_image, live_scores
 
 STATIC = os.path.join(os.path.dirname(__file__), "static")
 
-app = FastAPI(title="Poseidon — Circular Capture Coach", version="1.0.0")
+app = FastAPI(title="ApertureGrade — Circular Capture Coach", version="1.0.0")
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -254,4 +254,4 @@ def voice_script(payload: dict):
 
 @app.get("/")
 def index():
-    return {"ok": True, "name": "Poseidon", "docs": "/docs"}
+    return {"ok": True, "name": "ApertureGrade", "docs": "/docs"}

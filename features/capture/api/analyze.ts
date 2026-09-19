@@ -1,6 +1,6 @@
 import type { PhotoResult, PracticeCatalog, SetResult } from "../types";
 
-const PROXY_PATH = "/poseidon-api";
+const PROXY_PATH = "/aperturegrade-api";
 
 /** Same-origin proxy in dev (phone-safe with HTTPS). Override with NEXT_PUBLIC_API_URL in prod. */
 export function apiUrl() {

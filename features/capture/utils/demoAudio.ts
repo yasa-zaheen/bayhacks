@@ -1,16 +1,16 @@
 import type { DemoCueId } from "./demoScript";
 
-const BASE = "/audio/poseidon-demo";
+const BASE = "/audio/aperturegrade-demo";
 
 function audioPath(filename: string) {
   return `${BASE}/${encodeURIComponent(filename)}`;
 }
 
 /**
- * ElevenLabs MP3 map — drop files in public/audio/poseidon-demo/
- * Full list + scripts: public/audio/poseidon-demo/AUDIO_TO_RECORD.md
+ * ElevenLabs MP3 map — drop files in public/audio/aperturegrade-demo/
+ * Full list + scripts: public/audio/aperturegrade-demo/AUDIO_TO_RECORD.md
  */
-export const POSEIDON_DEMO_AUDIO: Record<DemoCueId, string> = {
+export const APERTUREGRADE_DEMO_AUDIO: Record<DemoCueId, string> = {
   welcome: audioPath("welcome.mp3"),
   front: audioPath("step 1.mp3"),
   front_steady: audioPath("hold steady.mp3"),
@@ -33,9 +33,9 @@ export const POSEIDON_DEMO_AUDIO: Record<DemoCueId, string> = {
   accept_perfect_label: audioPath("perfect_label.mp3"),
 };
 
-export const POSEIDON_DEMO_SCRIPTS: Record<DemoCueId, string> = {
+export const APERTUREGRADE_DEMO_SCRIPTS: Record<DemoCueId, string> = {
   welcome:
-    "Welcome to Poseidon. We'll capture three photos — the front, the back, and the serial tag.",
+    "Welcome to ApertureGrade. We'll capture three photos — the front, the back, and the serial tag.",
   front: "Step one — the front. Fill the frame with the device.",
   front_steady: "Hold steady… stop shaking for a moment.",
   front_ready: "Good. Hold still — I'll capture when you're locked in.",

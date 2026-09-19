@@ -30,7 +30,7 @@ export function PerfectSetCelebration() {
             Perfect set
           </h2>
           <p className="mt-4 text-base text-white/85">
-            All required views are usable. Poseidon unlocked the digital product
+            All required views are usable. ApertureGrade unlocked the digital product
             passport and refurb route.
           </p>
           {retakeCount > 0 ? (

@@ -1,4 +1,4 @@
-# ReCapture — Circular Capture Coach
+# ApertureGrade — Circular Capture Coach
 
 American Circular track entry. React Native (Expo) app plus a FastAPI vision backend.
 
@@ -18,7 +18,7 @@ Beyond the rubric: component callouts, Back Market-style condition grade, circul
 ## Run the API (required)
 
 ```bash
-cd server/poseidon
+cd server/aperturegrade
 python3 -m pip install -r requirements.txt
 python3 -m uvicorn main:app --host 127.0.0.1 --port 8000
 ```

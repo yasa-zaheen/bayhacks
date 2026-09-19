@@ -1,5 +1,5 @@
 ================================================================================
-POSEIDON — DETERMINISTIC DEMO WALKTHROUGH
+APERTUREGRADE — DETERMINISTIC DEMO WALKTHROUGH
 American Circular · Bay Hacks · ASUS ROG Strix G531GT
 ================================================================================
 
@@ -14,7 +14,7 @@ Refurb value  : $385 USD  (realistic for i7/GTX 1650 class refurb, not $15)
 CO₂ saved     : 11.2 kg vs landfill
 
 Save location for voice files (already recorded):
-  public/audio/poseidon-demo/
+  public/audio/aperturegrade-demo/
 
 Run before every demo:
   bun dev
@@ -74,7 +74,7 @@ Voice / action (deterministic):
      → Front view locked ✓
 
 Say to camera:
-  “Poseidon rejected motion blur, coached a retake, and accepted a sharp front
+  “ApertureGrade rejected motion blur, coached a retake, and accepted a sharp front
    shot — same OpenCV rules as the practice dataset.”
 
 
@@ -189,7 +189,7 @@ Flow C — Practice library (deterministic American Circular sets)
     • Missing view detection — passport locked, “Missing views” banner
 
 Say to camera:
-  “Upload and practice sets use the same /poseidon-api OpenCV engine as live
+  “Upload and practice sets use the same /aperturegrade-api OpenCV engine as live
    capture. Practice scoreboard proves we match the published labels.”
 
 
@@ -249,7 +249,7 @@ TECH CHECKLIST (5 min before judges)
 [ ] One test blur retake + recovery
 [ ] Passport shows ASUS ROG G531GT / G531GT / R3NRCX012847391 / $385
 [ ] Fraud section: low risk, green
-[ ] All MP3s in public/audio/poseidon-demo/ (see AUDIO_TO_RECORD.md)
+[ ] All MP3s in public/audio/aperturegrade-demo/ (see AUDIO_TO_RECORD.md)
 
 
 ================================================================================
